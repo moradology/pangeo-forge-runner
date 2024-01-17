@@ -1,6 +1,9 @@
+from apache_beam import Pipeline
 from apache_beam.pipeline import PipelineOptions
 from traitlets import Bool
 from traitlets.config import LoggingConfigurable
+
+import logging
 
 
 class Bakery(LoggingConfigurable):
@@ -12,15 +15,17 @@ class Bakery(LoggingConfigurable):
     and the Bakery takes care of the rest.
     """
 
-    blocking = Bool(
-        False,
-        config=False,
-        help="""
-        Set to True if this Bakery will default block calls to pipeline.run()
+    def __init__(self, **kwargs):
+        # Initialize traitlets
+        super().__init__(**kwargs)
+        # Set up logging
+        self.log = logging.getLogger(__name__)
 
-        Not configurable, should be overriden only by subclasses.
-        """,
-    )
+    def bake(pipeline: Pipeline, name: str, extra: dict) -> None:
+        """
+        Implementation specifics for this bakery's run.
+        """
+        raise NotImplementedError("Override bake in subclass")
 
     def get_pipeline_options(
         self, job_name: str, container_image: str, extra_options: dict

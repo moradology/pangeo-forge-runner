@@ -4,6 +4,7 @@ Bakery for baking pangeo-forge recipes in GCP DataFlow
 import shutil
 import subprocess
 
+from apache_beam import Pipeline
 from apache_beam.pipeline import PipelineOptions
 from traitlets import Bool, Integer, TraitError, Unicode, default, validate
 
@@ -144,6 +145,17 @@ class DataflowBakery(Bakery):
         if not proposal["value"].startswith("gs://"):
             raise TraitError("DataflowBakery.temp_gcs_location must be a gs:// URL")
         return proposal["value"]
+    
+    def bake(self, pipeline: Pipeline, name: str, extra: dict) -> None:
+        """
+        Implementation specifics for this bakery's run
+        """
+        result = pipeline.run()
+        job_id = result.job_id()
+        self.log.info(
+            f"Submitted job {job_id} for recipe {name}",
+            extra=extra | {"job_id": job_id, "status": "submitted"},
+        )
 
     def get_pipeline_options(
         self, job_name: str, container_image: str, extra_options: dict

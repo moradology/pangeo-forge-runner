@@ -10,6 +10,7 @@ import tempfile
 import time
 
 import escapism
+from apache_beam import Pipeline
 from apache_beam.pipeline import PipelineOptions
 from traitlets import Bool, Dict, Integer, Unicode
 
@@ -50,10 +51,6 @@ class FlinkOperatorBakery(Bakery):
     Requires a kubernetes cluster with https://github.com/apache/flink-kubernetes-operator
     installed
     """
-
-    # Not actually, but we don't have a job_id to return.
-    # that looks like just a dataflow concept, we'll have to refactor
-    blocking = True
 
     flink_version = Unicode(
         "1.16",
@@ -175,6 +172,16 @@ class FlinkOperatorBakery(Bakery):
         https://github.com/pangeo-forge/pangeo-forge-cloud-federation/blob/main/terraform/aws/variables.tf
         """,
     )
+
+    def bake(self, pipeline: Pipeline, name: str, extra: dict) -> None:
+        """
+        Implementation specifics for this bakery's run
+        """
+        self.log.info(
+            f"Running job for recipe {name}\n",
+            extra=extra | {"status": "running"},
+        )
+        pipeline.run()
 
     def add_job_manager_pod_template(self, current_flink_deploy: dict):
         """Add the job manager pod template to the existing flink deploy

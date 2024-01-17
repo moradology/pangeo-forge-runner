@@ -3,26 +3,37 @@ Bakery for baking pangeo-forge recipes in Direct Runner
 """
 from apache_beam import Pipeline
 from apache_beam.pipeline import PipelineOptions
-from traitlets import Integer
+from traitlets import Unicode
 
 from .base import Bakery
 
+import json
+import os
 
-class LocalDirectBakery(Bakery):
+
+class ProcessHarnessBakery(Bakery):
     """
-    Bake recipes on your local machine, without docker.
-
-    Uses the Apache Beam DirectRunner
+    Bake recipes to be run by a custom-built beam `boot` harness.
+    Suitable for running spark-backed beam jobs on EMR.
+    https://beam.apache.org/documentation/runtime/sdk-harness-config/
     """
 
-    num_workers = Integer(
-        0,
+    harness_binary = Unicode(
+        "/home/hadoop/boot",
         config=True,
         help="""
-        Number of workers to use when baking the recipe.
+        Path to the sdk harness 'boot' binary to use.
 
-        Defaults to 0, which is interpreted by Apache beam to be the
-        number of CPUs on the machine
+        https://beam.apache.org/documentation/runtime/sdk-harness-config/
+        """,
+    )
+
+    runner = Unicode(
+        "SparkRunner",
+        config=True,
+        help="""
+        Beam runner to use. Spark by default but likely compatible with other backends.
+        https://beam.apache.org/documentation/runners/spark/
         """,
     )
 
@@ -36,6 +47,7 @@ class LocalDirectBakery(Bakery):
         )
         pipeline.run()
 
+
     def get_pipeline_options(
         self, job_name: str, container_image: str, extra_options: dict
     ) -> PipelineOptions:
@@ -46,10 +58,10 @@ class LocalDirectBakery(Bakery):
         # for pipeline options - we have traitlets doing that for us.
         return PipelineOptions(
             flags=[],
-            runner="DirectRunner",
-            direct_running_mode="multi_processing",
-            direct_num_workers=self.num_workers,
             save_main_session=True,
+            runner=self.runner,
+            environment_type="PROCESS",
+            environment_config={"command": self.harness_binary},
             # this might solve serialization issues; cf. https://beam.apache.org/blog/beam-2.36.0/
             pickle_library="cloudpickle",
             **extra_options,

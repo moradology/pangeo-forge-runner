@@ -17,6 +17,7 @@ from .. import Feedstock
 from ..bakery.base import Bakery
 from ..bakery.flink import FlinkOperatorBakery
 from ..bakery.local import LocalDirectBakery
+from ..bakery.serialize import SerializeBakery
 from ..plugin import get_injections, get_injectionspecs_from_entrypoints
 from ..storage import InputCacheStorage, MetadataCacheStorage, TargetStorage
 from ..stream_capture import redirect_stderr, redirect_stdout
@@ -227,6 +228,8 @@ class Bake(BaseCommand):
                 self.log, {"status": "running"}
             ):
                 recipes = feedstock.parse_recipes()
+                print("ALL RECIPES")
+                print(recipes)
 
             if self.recipe_id:
                 if self.recipe_id not in recipes:
@@ -311,23 +314,11 @@ class Bake(BaseCommand):
                     # with configured storage now attached, compile recipe to beam
                     pipeline | recipe.to_beam()
 
-                # Some bakeries are blocking - if Beam is configured to use them, calling
-                # pipeline.run() blocks. Some are not. We handle that here, and provide
-                # appropriate feedback to the user too.
                 extra = {
                     "recipe": name,
                     "job_name": (per_recipe_unique_job_name or self.job_name),
                 }
-                if bakery.blocking:
-                    self.log.info(
-                        f"Running job for recipe {name}\n",
-                        extra=extra | {"status": "running"},
-                    )
-                    pipeline.run()
-                else:
-                    result = pipeline.run()
-                    job_id = result.job_id()
-                    self.log.info(
-                        f"Submitted job {job_id} for recipe {name}",
-                        extra=extra | {"job_id": job_id, "status": "submitted"},
-                    )
+                print(name)
+                print("PIPELINE")
+                print(pipeline)
+                bakery.bake(pipeline, name, extra)
