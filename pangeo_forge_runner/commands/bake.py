@@ -316,4 +316,7 @@ class Bake(BaseCommand):
                     "recipe": name,
                     "job_name": (per_recipe_unique_job_name or self.job_name),
                 }
+                print("OPTIONS")
+                print(pipeline.options.get_all_options())
+                print("END OPTIONS")
                 bakery.bake(pipeline, name, extra)
