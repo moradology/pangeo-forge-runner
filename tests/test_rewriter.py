@@ -35,9 +35,4 @@ def test_rewriter(name, params_path: Path, original_path: Path, rewritten_path: 
 
     rewriter = RecipeRewriter(**params["params"])
 
-    print("PRINTING ASTS1")
-    print(ast.unparse(orig_ast))
-    print("PRINTING ASTS2")
-    print(ast.unparse(rewriter.visit(orig_ast)))
-
     assert ast.unparse(rewriter.visit(orig_ast)) == ast.unparse(rewritten_ast)

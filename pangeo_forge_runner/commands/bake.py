@@ -228,8 +228,6 @@ class Bake(BaseCommand):
                 self.log, {"status": "running"}
             ):
                 recipes = feedstock.parse_recipes()
-                print("ALL RECIPES")
-                print(recipes)
 
             if self.recipe_id:
                 if self.recipe_id not in recipes:
@@ -318,7 +316,4 @@ class Bake(BaseCommand):
                     "recipe": name,
                     "job_name": (per_recipe_unique_job_name or self.job_name),
                 }
-                print(name)
-                print("PIPELINE")
-                print(pipeline)
                 bakery.bake(pipeline, name, extra)

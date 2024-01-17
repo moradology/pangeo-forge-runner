@@ -8,7 +8,6 @@ from traitlets import Unicode
 from .base import Bakery
 
 import json
-import os
 
 
 class ProcessHarnessBakery(Bakery):
@@ -61,7 +60,7 @@ class ProcessHarnessBakery(Bakery):
             save_main_session=True,
             runner=self.runner,
             environment_type="PROCESS",
-            environment_config={"command": self.harness_binary},
+            environment_config=json.dumps({"command": self.harness_binary}),
             # this might solve serialization issues; cf. https://beam.apache.org/blog/beam-2.36.0/
             pickle_library="cloudpickle",
             **extra_options,
