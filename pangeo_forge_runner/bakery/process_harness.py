@@ -56,8 +56,7 @@ class ProcessHarnessBakery(Bakery):
             "--runner=SparkRunner",
             "--environment_type=PROCESS",
             "--environment_config={\"command\": \"/home/hadoop/boot\"}",
-            "--sdk_harness_log_level=DEBUG",
-            "--default_sdk_harness_log_level=DEBUG"
+            "--spark_master_url=spark://localhost:7077"
         ])
         with beam.Pipeline(options=options) as p:
             (p
