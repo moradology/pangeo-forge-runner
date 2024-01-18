@@ -47,7 +47,6 @@ class ProcessHarnessBakery(Bakery):
         # pipeline.run()
         import apache_beam as beam
         from apache_beam.options.pipeline_options import PipelineOptions
-        println("IN BAKE METHOD")
         options = PipelineOptions([
             "--runner=SparkRunner",
             "--environment_type=PROCESS",
