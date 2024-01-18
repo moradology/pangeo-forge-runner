@@ -39,7 +39,7 @@ class BaseCommand(Application):
     Do not directly instantiate!
     """
 
-    log_level = logging.INFO
+    log_level = logging.DEBUG
 
     logging_config = Dict(
         {},
