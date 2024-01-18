@@ -40,11 +40,26 @@ class ProcessHarnessBakery(Bakery):
         """
         Implementation specifics for this bakery's run
         """
-        self.log.info(
-            f"Running job for recipe {name}\n",
-            extra=extra | {"status": "running"},
-        )
-        pipeline.run()
+        # self.log.info(
+        #     f"Running job for recipe {name}\n",
+        #     extra=extra | {"status": "running"},
+        # )
+        # pipeline.run()
+        import apache_beam as beam
+        from apache_beam.options.pipeline_options import PipelineOptions
+        options = PipelineOptions([
+            "--runner=SparkRunner",
+            "--environment_type=PROCESS",
+            "--environment_config={\"command\": \"/home/hadoop/boot\"}"
+        ])
+        with beam.Pipeline(options=options) as p:
+            (p
+            | 'ReadFromText' >> beam.io.ReadFromText('s3://nzimmerman-testing/texts/mobydick.txt')
+            | 'SplitWords' >> beam.FlatMap(lambda x: x.split())
+            | 'CountWords' >> beam.combiners.Count.PerElement()
+            | 'FormatResults' >> beam.Map(lambda word_count: f"{word_count[0]}: {word_count[1]}")
+            | 'WriteToText' >> beam.io.WriteToText('s3://nzimmerman-testing/beam/output2')
+            )
 
 
     def get_pipeline_options(
