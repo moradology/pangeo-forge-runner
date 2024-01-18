@@ -45,12 +45,19 @@ class ProcessHarnessBakery(Bakery):
         #     extra=extra | {"status": "running"},
         # )
         # pipeline.run()
+        import os
+        print("START ENV")
+        for key, value in os.environ.items():
+            print(f"{key}: {value}")
+        print("END ENV")
         import apache_beam as beam
         from apache_beam.options.pipeline_options import PipelineOptions
         options = PipelineOptions([
             "--runner=SparkRunner",
             "--environment_type=PROCESS",
-            "--environment_config={\"command\": \"/home/hadoop/boot\"}"
+            "--environment_config={\"command\": \"/home/hadoop/boot\"}",
+            "--sdk_harness_log_level=DEBUG",
+            "--default_sdk_harness_log_level=DEBUG"
         ])
         with beam.Pipeline(options=options) as p:
             (p
